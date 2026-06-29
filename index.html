@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Phan Việt Hoàng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset CSS cơ bản */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(rgba(10, 20, 30, 0.4), rgba(10, 20, 30, 0.6)), 
+                        url('https://i.ibb.co/d4LbxjMp/B48-B9-E41-6-AD4-40-EC-8-DEE-A8738-B574897.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Lớp chứa hiệu ứng tuyết rơi nền */
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Nằm dưới text nhưng nằm trên ảnh nền */
+            pointer-events: none; /* Không cản trở việc click chuột vào link */
+        }
+
+        /* --- 1. Thanh Menu Điều Hướng (Navbar) - GIỮ NGUYÊN --- */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        nav a:hover, nav a.active {
+            color: #fff;
+        }
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: 0.3s;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .theme-toggle:hover { opacity: 1; }
+
+        /* --- 2. Nội Dung Chính (Main Content) --- */
+        main {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* KHUNG AVATAR ĐÃ ĐƯỢC CHỈNH TO (TỪ 280px LÊN 350px) PHÙ HỢP CÂN ĐỐI */
+        .avatar-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .avatar-img {
+            width: 215px;
+            height: 215px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            z-index: 1;
+            top: 65px; /* Đẩy xuống tâm hoàn hảo của khung viền mới */
+        }
+
+        .avatar-frame {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Tên chủ tài khoản gradient đổ màu mượt theo ảnh */
+        .profile-name {
+            font-size: 3.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #b59dfa, #71cdfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px; /* Thu nhỏ bớt margin để nhường chỗ cho Slogan */
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* Thẻ chứa hình ảnh tích xanh để căn chỉnh kích thước và thẳng hàng với tên */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .verified-badge img {
+            width: 31px; /* Tự động co nhỏ lại vừa vặn với kích thước chữ của tên */
+            height: 31px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 4px rgba(29, 155, 240, 0.4)); /* Tạo hiệu ứng phát sáng nhẹ */
+        }
+
+        /* --- VÙNG HIỂN THỊ SLOGAN VỚI HIỆU ỨNG CHUYỂN ĐỔI --- */
+        .slogan-container {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.75);
+            font-style: italic;
+            font-weight: 400;
+            min-height: 28px; /* Giữ khung không bị nhảy giật khi đổi chữ */
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Class kích hoạt hiệu ứng biến mất khi đổi chữ */
+        .slogan-container.fade-out {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        /* HIỆU ỨNG LIQUID GLASS ĐẬM CHẤT KÍNH MỜ CHO SOCIAL PANEL */
+        .social-container {
+            display: flex;
+            align-items: center;
+            gap: 0px; /* Reset để dùng padding & viền chia khoảng cách */
+            background: rgba(13, 20, 33, 0.35);
+            padding: 14px 20px;
+            border-radius: 20px;
+            /* Viền đôi mờ tạo độ dày cho kính */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.15),
+                0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 540px;
+            justify-content: space-around;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex: 1;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        /* Tạo đường vạch kẻ ngăn cách (|) giữa các logo như trong hình */
+        .social-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .social-item:hover {
+            color: #fff;
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        }
+
+        /* Tinh chỉnh size logo chuẩn tỉ lệ kính mờ */
+        .social-item i {
+            font-size: 1.6rem;
+        }
+        
+        /* Đổ màu chuẩn logo thương hiệu */
+        .fa-github { color: #ffffff; }
+        .fa-facebook { color: #1877f2; }
+        .fa-discord { color: #5865f2; }
+        
+        /* Custom riêng nút Zalo dạng icon khối tròn/bo góc như hình mẫu */
+        .zalo-icon {
+            background: #0068ff;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 5px 7px;
+            border-radius: 9px;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0, 104, 255, 0.3);
+        }
+
+        /* Khu vực Ủng hộ (QR Code) */
+        .donate-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .donate-title {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        
+        /* Hiệu ứng Liquid Glass & Glow xanh neon cho khung QR */
+        .qr-card {
+            background: rgba(13, 20, 33, 0.4);
+            padding: 12px;
+            border-radius: 28px;
+            border: 1.5px solid rgba(0, 102, 255, 0.45);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.1),
+                0 0 25px rgba(0, 102, 255, 0.35);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+        }
+
+        .qr-card:hover {
+            box-shadow: 
+                inset 0 1px 4px rgba(255, 255, 255, 0.2),
+                0 0 35px rgba(0, 102, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .qr-code {
+            width: 170px;
+            height: 170px;
+            display: block;
+            border-radius: 18px;
+        }
+
+        /* --- 3. Thanh Thông Tin Dưới Cùng (Footer) - GIỮ NGUYÊN --- */
+        footer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 5%;
+            background: rgba(10, 15, 30, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Responsive cho mobile --- */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            nav { gap: 15px; }
+            .profile-name { font-size: 2.4rem; }
+            .social-container { 
+                width: 90%; 
+                padding: 12px 10px;
+            }
+            footer {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="snow-canvas"></canvas>
+
+    <main>
+        <div class="avatar-container">
+            <img src="https://i.ibb.co/s9zKZqrX/E6-CBAF7-A-6-FE4-4790-9389-D2-F64-D22-C1-CA.jpg" alt="Avatar" class="avatar-img">
+            <img src="https://i.ibb.co/MkPkh4xs/BE9084-F3-EA4-A-4840-9-C3-C-05791903-A6-B0.png" alt="Khung Viền" class="avatar-frame">
+        </div>
+        
+        <h1 class="profile-name">
+            Phan Việt Hoàng
+            <span class="verified-badge">
+                <a href="https://imgbb.com/"><img src="https://i.ibb.co/VWpK2BMJ/5-D6-A0-C63-30-A8-4-DC2-BFCE-03-D04-CD6-A02-F.png" alt="Tích xanh xác minh" border="0"></a>
+            </span>
+        </h1>
+
+        <div class="slogan-container" id="slogan-text">Loading slogan...</div>
+
+        <div class="social-container">
+            <a href="https://github.com/tobiephan208" target="_blank" class="social-item">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://facebook.com/pnhhz" target="_blank" class="social-item">
+                <i class="fab fa-facebook"></i>
+            </a>
+            <a href="https://discord.gg/ujBGXTEgEc" target="_blank" class="social-item">
+                <i class="fab fa-discord"></i>
+            </a>
+            <a href="https://zalo.me/84366474283" target="_blank" class="social-item">
+                <span class="zalo-icon">Zalo</span>
+            </a>
+        </div>
+
+        <div class="donate-section">
+            <p class="donate-title"><i class="fa-regular fa-heart"></i> Ủng Hộ Mình:</p>
+
+            <div class="qr-card">
+                <img src="https://i.ibb.co/5hBTmFn6/3-CE3-E3-D2-0922-4-A5-B-9-DEE-B186-EB6-C7-C9-B.jpg" alt="Mã QR" class="qr-code">
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-item">
+            © Phan Viet Hoang 2026
+        </div>
+    </footer>
+
+    <script>
+        /* --- JS XỬ LÝ ĐỔI SLOGAN MƯỢT MÀ --- */
+        const slogans = [
+            "“Lời hứa như gió mây bay, hứa hẹn một đời rồi cũng chia tay😔.”",
+            "“Không ai sống ở quá khứ mãi mãi, chỉ là họ tiếc nuối một người.”",
+            "“NYC là thứ rẻ rách.”",
+            "“Kỷ niệm dù đẹp đến mấy rồi cũng chỉ là 'kỷ niệm'.”"
+        ];
+        
+        let currentSloganIndex = 0;
+        const sloganElement = document.getElementById('slogan-text');
+
+        function changeSlogan() {
+            sloganElement.classList.add('fade-out');
+            
+            setTimeout(() => {
+                currentSloganIndex = (currentSloganIndex + 1) % slogans.length;
+                sloganElement.innerText = slogans[currentSloganIndex];
+                sloganElement.classList.remove('fade-out');
+            }, 600);
+        }
+        
+        sloganElement.innerText = slogans[0];
+        setInterval(changeSlogan, 4000);
+
+
+        /* --- JS XỬ LÝ TUYẾT RƠI NỀN (GIỮ NGUYÊN) --- */
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const numFlakes = 80; 
+        const flakes = [];
+
+        for (let i = 0; i < numFlakes; i++) {
+            flakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 3 + 1, 
+                d: Math.random() * numFlakes, 
+                speed: Math.random() * 1 + 0.5 
+            });
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.75)"; 
+            ctx.beginPath();
+            for (let i = 0; i < numFlakes; i++) {
+                const f = flakes[i];
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+
+                f.y += f.speed;
+                f.x += Math.sin(f.d) * 0.5;
+                f.d += 0.01;
+
+                if (f.y > canvas.height || f.x > canvas.width || f.x < 0) {
+                    flakes[i] = {
+                        x: Math.random() * canvas.width,
+                        y: -10,
+                        r: f.r,
+                        d: f.d,
+                        speed: f.speed
+                    };
+                }
+            }
+            ctx.fill();
+            requestAnimationFrame(drawSnow);
+        }
+
+        drawSnow();
+    </script>
+</body>
+</html>
